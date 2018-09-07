@@ -12,6 +12,11 @@ struct Test:public Object
        c = 'a';
        std::cout<<ss.str()<<std::endl;
     }
+
+    int& get_value()
+    {
+        return m_a;
+    }
 };
 
 int main()
@@ -19,6 +24,7 @@ int main()
     Test t;
     t.property("m_a",&Test::m_a);
     t.method("show",&Test::show);
+    t.method("get_value",&Test::get_value);
     Object& obj = t;
     std::cout<<obj.get<int>("m_a")<<std::endl;
     auto& value = obj.get<int>("m_a");
@@ -27,6 +33,10 @@ int main()
     char c = 'c';
     obj.invoke("show",20.12,c);
     std::cout<<c<<std::endl;
+
+    obj.invoke<int&>("get_value")+=10;
+    std::cout<<t.m_a<<std::endl;
+
 
     std::shared_ptr<Test> smart_t = std::make_shared<Test>();
     smart_t->property("m_a",&Test::m_a);

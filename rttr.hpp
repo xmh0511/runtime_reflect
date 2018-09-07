@@ -52,6 +52,18 @@ namespace  rttr
     };
 
     template<typename T>
+    struct is_has_reference:std::false_type
+    {
+
+    };
+
+    template<typename T>
+    struct is_has_reference<T&>:std::true_type
+    {
+
+    };
+
+    template<typename T>
     class method_invok;
 
     template<typename Ret,typename Class,typename...Args>
@@ -100,6 +112,9 @@ namespace  rttr
         template<typename RType>
         std::enable_if_t<!std::is_void_v<RType>,std::any>  call_help(ClassType* obj,Args...args)
         {
+            if(is_has_reference<Ret>::value){
+                return &(obj->*func_)(args...);
+            }
             return (obj->*func_)(args...);
         }
 
@@ -147,9 +162,14 @@ class Object
             auto iter = meta_method_map_.find(name);
             if(iter!=meta_method_map_.end()){
                 auto tup = std::tuple<Args...>(std::forward<Args>(args)...);
+                if(is_has_reference<Convert>::value){
+                    using pointType = typename std::remove_reference<Convert>::type* ;
+                    auto ptr = std::any_cast<pointType>(iter->second->invoke(this,tup));
+                    return *ptr;
+                }
                 return std::any_cast<Convert>(iter->second->invoke(this,tup));
             }
-            return {};
+            return (Convert&)(*this);
         };
 
         template<typename...Args>
