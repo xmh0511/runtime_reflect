@@ -64,6 +64,12 @@ namespace  rttr
     };
 
     template<typename T>
+    struct is_has_reference<T&&>:std::true_type
+    {
+
+    };
+
+    template<typename T>
     class method_invok;
 
     template<typename Ret,typename Class,typename...Args>
