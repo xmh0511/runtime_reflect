@@ -37,8 +37,8 @@ int main()
 
     ///--------------cast
 
-//    std::shared_ptr<Test> t2 = std::dynamic_pointer_cast<Test>(ob);
-//    std::cout<<t2->m_a<<std::endl;
+    std::shared_ptr<Test> t2 = std::dynamic_pointer_cast<Test>(ob);
+    std::cout<<t2->m_a<<std::endl;
 
     return 0;
 }
