@@ -157,7 +157,7 @@ class Object
         }
 
         template<typename Convert,typename...Args>
-        Convert invoke(const std::string& name,Args&&...args)
+        std::enable_if_t<!std::is_void_v<Convert>,Convert> invoke(const std::string& name,Args&&...args)
         {
             auto iter = meta_method_map_.find(name);
             if(iter!=meta_method_map_.end()){
@@ -170,6 +170,12 @@ class Object
                 return std::any_cast<Convert>(iter->second->invoke(this,tup));
             }
             return (Convert&)(*this);
+        };
+
+        template<typename Convert,typename...Args>
+        std::enable_if_t<std::is_void_v<Convert>> invoke(const std::string& name,Args&&...args)
+        {
+            invoke(name,std::forward<Args>(args)...);
         };
 
         template<typename...Args>
