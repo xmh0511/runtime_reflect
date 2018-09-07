@@ -5,10 +5,11 @@ using namespace rttr;
 struct Test:public Object
 {
     int m_a = 20;
-    void show(double f,char c)
+    void show(double f,char& c)
     {
        std::stringstream ss;
        ss<<"show()--->"<<f<<"=="<<c;
+       c = 'a';
        std::cout<<ss.str()<<std::endl;
     }
 };
@@ -20,19 +21,24 @@ int main()
     t.method("show",&Test::show);
     Object& obj = t;
     std::cout<<obj.get<int>("m_a")<<std::endl;
-    obj.invoke("show",20.12,'c');
+    auto& value = obj.get<int>("m_a");
+    value=value+1;
+    std::cout<<t.m_a<<std::endl;
+    char c = 'c';
+    obj.invoke("show",20.12,c);
+    std::cout<<c<<std::endl;
 
     std::shared_ptr<Test> smart_t = std::make_shared<Test>();
     smart_t->property("m_a",&Test::m_a);
     smart_t->method("show",&Test::show);
     std::shared_ptr<Object> ob = smart_t;
     std::cout<<ob->get<int>("m_a")<<std::endl;
-    ob->invoke("show",20.12,'c');
+    ob->invoke("show",20.12,c);
 
     ///--------------cast
 
-    std::shared_ptr<Test> t2 = std::dynamic_pointer_cast<Test>(ob);
-    std::cout<<t2->m_a<<std::endl;
+//    std::shared_ptr<Test> t2 = std::dynamic_pointer_cast<Test>(ob);
+//    std::cout<<t2->m_a<<std::endl;
 
     return 0;
 }

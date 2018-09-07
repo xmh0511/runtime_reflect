@@ -24,7 +24,7 @@ namespace  rttr
     class element_data_class;
 
     template<typename A,typename Class>
-    class element_data_class<A(Class::*)>:public base_data_interface
+    class element_data_class<A(Class::*)> final:public base_data_interface
     {
     public:
         using element_type = A(Class::*);
@@ -38,7 +38,8 @@ namespace  rttr
         std::any get(std::any instance)
         {
             Object* ptr = std::any_cast<Object*>(instance);
-            return std::any(dynamic_cast<ClassType*>(ptr)->*element_);
+            ClassType* desc_ptr = dynamic_cast<ClassType*>(ptr);
+            return std::any(&(desc_ptr->*element_));
         }
     private:
         element_type element_;
@@ -54,7 +55,7 @@ namespace  rttr
     class method_invok;
 
     template<typename Ret,typename Class,typename...Args>
-    class method_invok<Ret(Class::*)(Args...)>:public base_method_interface
+    class method_invok<Ret(Class::*)(Args...)> final:public base_method_interface
     {
     public:
         using Function =  Ret(Class::*)(Args...);
@@ -67,8 +68,14 @@ namespace  rttr
     public:
         std::any invoke(std::any instance,std::any ArgsTuple)
         {
-            auto tup = std::any_cast<std::tuple<Args...>>(ArgsTuple);
-            return invoke_help(std::make_index_sequence<sizeof...(Args)>{},tup,instance);
+            try{
+                auto tup = std::any_cast<std::tuple<Args...>>(ArgsTuple);
+                return invoke_help(std::make_index_sequence<sizeof...(Args)>{},tup,instance);
+            }catch (std::bad_any_cast& error){
+                auto er = std::string("the invoke args's type is not as the same as method's");
+                std::cout<<er<<std::endl;
+                throw er;
+            }
         }
 
         template<std::size_t...Indexs,typename Tuple>
@@ -124,32 +131,33 @@ class Object
         }
 
         template<typename Convert>
-        Convert get(const std::string& name)
+        Convert& get(const std::string& name)
         {
             auto iter = meta_property_map_.find(name);
             if(iter!=meta_property_map_.end()){
-                return std::any_cast<Convert>(iter->second->get(this));
+                Convert* data_ptr = std::any_cast<Convert*>(iter->second->get(this));
+                return *data_ptr;
             }
-            return {};
+            return (Convert&)(*this);  //bad data
         }
 
         template<typename Convert,typename...Args>
-        Convert invoke(const std::string& name,Args...args)
+        Convert invoke(const std::string& name,Args&&...args)
         {
             auto iter = meta_method_map_.find(name);
             if(iter!=meta_method_map_.end()){
-                auto tup = std::make_tuple(args...);
+                auto tup = std::tuple<Args...>(std::forward<Args>(args)...);
                 return std::any_cast<Convert>(iter->second->invoke(this,tup));
             }
             return {};
         };
 
         template<typename...Args>
-        void invoke(const std::string& name,Args...args)
+        void invoke(const std::string& name,Args&&...args)
         {
             auto iter = meta_method_map_.find(name);
             if(iter!=meta_method_map_.end()){
-                auto tup = std::make_tuple(args...);
+                auto tup = std::tuple<Args...>(std::forward<Args>(args)...);
                 iter->second->invoke(this,tup);
             }
         };
