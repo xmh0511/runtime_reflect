@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/dy2018/github/runtime/main.cpp
+iostream
+-
+rttr.hpp
+/home/dy2018/github/runtime/rttr.hpp
+sstream
+-
+
+/home/dy2018/github/runtime/rttr.hpp
+iostream
+-
+string
+-
+tuple
+-
+memory
+-
+functional
+-
+any
+-
+map
+-
+utility
+-
+
