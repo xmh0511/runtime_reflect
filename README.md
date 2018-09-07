@@ -1,7 +1,7 @@
-# c++ runtime reflection library
+### c++ runtime reflection library
 support c++14
 
-# how to use 
+### how to use 
 ````
 struct Test:public Object
 {
@@ -11,11 +11,12 @@ struct Test:public Object
     std::cout<<"just hello,world"<<std::endl;
   }
   
-  int show_and_return(char& c)
+  int& show_and_return(char& c)
   {
       std::cout<<"c value=="<<c<<std::endl;
       c = 'a';
-      return interger+5;
+      interger++;
+      return interger;
   }
 };
 
@@ -38,6 +39,7 @@ obj.invoke("show");
 
 ////call member method show_and_return
 char c = 'c';
-obj.invoke("show_and_return",c);
-
+auto& v = obj.invoke<int&>("show_and_return",c);
+v++;
+std::cout<<t.interger<<std::endl;
 ````
